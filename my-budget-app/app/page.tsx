@@ -108,6 +108,193 @@ const CategoryIcon = ({ category }: { category: string }) => {
   );
 };
 
+// 달력 컴포넌트
+const Calendar = ({
+  transactions,
+  currentMonth,
+  onMonthChange,
+}: {
+  transactions: Transaction[];
+  currentMonth: Date;
+  onMonthChange: (date: Date) => void;
+}) => {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  // 해당 월의 첫 번째 날과 마지막 날
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startingDayOfWeek = firstDay.getDay();
+
+  // 이전 달로 이동
+  const prevMonth = () => {
+    onMonthChange(new Date(year, month - 1, 1));
+  };
+
+  // 다음 달로 이동
+  const nextMonth = () => {
+    onMonthChange(new Date(year, month + 1, 1));
+  };
+
+  // 날짜별 거래 금액 계산
+  const getDayTransactions = (day: number) => {
+    const date = new Date(year, month, day);
+    const dayStart = new Date(date.setHours(0, 0, 0, 0));
+    const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+
+    const dayTransactions = transactions.filter((t) => {
+      const tDate = new Date(t.date);
+      return tDate >= dayStart && tDate <= dayEnd;
+    });
+
+    const income = dayTransactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const expense = dayTransactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    return { income, expense, total: income - expense };
+  };
+
+  // 오늘 날짜 확인
+  const isToday = (day: number) => {
+    const today = new Date();
+    return (
+      day === today.getDate() &&
+      month === today.getMonth() &&
+      year === today.getFullYear()
+    );
+  };
+
+  const monthNames = [
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월',
+  ];
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={prevMonth}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label="이전 달"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <h2 className="text-xl font-semibold text-gray-800">
+          {year}년 {monthNames[month]}
+        </h2>
+        <button
+          onClick={nextMonth}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label="다음 달"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {dayNames.map((day) => (
+          <div
+            key={day}
+            className="text-center text-sm font-medium text-gray-600 py-2"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: startingDayOfWeek }).map((_, index) => (
+          <div key={`empty-${index}`} className="aspect-square" />
+        ))}
+        {Array.from({ length: daysInMonth }).map((_, index) => {
+          const day = index + 1;
+          const { income, expense, total } = getDayTransactions(day);
+          const today = isToday(day);
+
+          return (
+            <div
+              key={day}
+              className={`aspect-square border border-gray-200 rounded-lg p-1 flex flex-col items-center justify-center ${
+                today ? 'bg-blue-50 border-blue-400' : 'bg-gray-50'
+              }`}
+            >
+              <span
+                className={`text-xs font-medium mb-1 ${
+                  today ? 'text-blue-600' : 'text-gray-700'
+                }`}
+              >
+                {day}
+              </span>
+              {income > 0 && (
+                <span className="text-[10px] text-blue-600 font-medium">
+                  +{formatAmountShort(income)}
+                </span>
+              )}
+              {expense > 0 && (
+                <span className="text-[10px] text-red-600 font-medium">
+                  -{formatAmountShort(expense)}
+                </span>
+              )}
+              {income === 0 && expense === 0 && (
+                <span className="text-[10px] text-gray-400">-</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// 짧은 금액 포맷팅 (천 단위 이상만 표시)
+const formatAmountShort = (value: number): string => {
+  if (value >= 10000) {
+    return `${Math.floor(value / 10000)}만`;
+  } else if (value >= 1000) {
+    return `${Math.floor(value / 1000)}천`;
+  }
+  return value.toString();
+};
+
 // 파이 차트 컴포넌트
 const PieChart = ({
   data,
@@ -220,6 +407,19 @@ export default function Home() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  
+  // 날짜 상태 (기본값: 현재 날짜/시간)
+  const getCurrentDateTimeString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+  const [transactionDate, setTransactionDate] = useState<string>(getCurrentDateTimeString());
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -307,7 +507,7 @@ export default function Home() {
 
     try {
       const transactionAmount = parseFloat(amount.replace(/,/g, ''));
-      const transactionDate = new Date();
+      const selectedDate = new Date(transactionDate);
 
       const { data, error } = await supabase
         .from('transactions')
@@ -317,7 +517,7 @@ export default function Home() {
             description: description || '내용 없음',
             category,
             type,
-            date: transactionDate.toISOString(),
+            date: selectedDate.toISOString(),
           },
         ])
         .select()
@@ -343,6 +543,7 @@ export default function Home() {
       setDescription('');
       setCategory('기타');
       setType('expense');
+      setTransactionDate(getCurrentDateTimeString());
     } catch (error) {
       console.error('거래 추가 오류:', error);
       alert('거래 추가에 실패했습니다.');
@@ -533,35 +734,15 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-8 px-4">
       <div className="w-full max-w-4xl space-y-6">
-        {/* 제목 및 카테고리 관리 버튼 */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-800">가계부</h1>
-          <button
-            onClick={() => setShowCategoryModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            카테고리 관리
-          </button>
-        </div>
+        {/* 제목 */}
+        <h1 className="text-3xl font-bold text-center text-gray-800">가계부</h1>
+
+        {/* 달력 카드 */}
+        <Calendar
+          transactions={transactions}
+          currentMonth={calendarMonth}
+          onMonthChange={setCalendarMonth}
+        />
 
         {/* 요약 카드 */}
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -679,11 +860,52 @@ export default function Home() {
               />
             </div>
 
-            {/* 카테고리 */}
+            {/* 날짜 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                카테고리
+                날짜 및 시간
               </label>
+              <input
+                type="datetime-local"
+                value={transactionDate}
+                onChange={(e) => setTransactionDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* 카테고리 */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  카테고리
+                </label>
+                <button
+                  onClick={() => setShowCategoryModal(true)}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                  aria-label="카테고리 관리"
+                  title="카테고리 관리"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
               <div className="relative">
                 <select
                   value={category}
