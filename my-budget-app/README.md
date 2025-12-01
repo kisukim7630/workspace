@@ -71,4 +71,32 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
+### Vercel 배포 설정
+
+1. **프로젝트 연결**
+   - Vercel 대시보드에서 "Add New Project" 클릭
+   - GitHub/GitLab/Bitbucket 저장소 연결
+
+2. **Root Directory 설정 (중요!)**
+   - 프로젝트 설정 → Settings → General
+   - "Root Directory"를 `my-budget-app`으로 설정
+   - 또는 프로젝트가 `my-budget-app` 폴더 안에 있다면 해당 폴더명 입력
+
+3. **환경 변수 설정**
+   - Settings → Environment Variables
+   - 다음 변수 추가:
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+4. **배포**
+   - 설정 저장 후 자동으로 배포 시작
+   - 또는 "Deploy" 버튼 클릭
+
+### 배포 오류 해결
+
+만약 "No Next.js version detected" 오류가 발생하면:
+- Root Directory가 `my-budget-app`으로 설정되어 있는지 확인
+- `package.json` 파일이 Root Directory 안에 있는지 확인
+- 프로젝트를 다시 배포
+
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
