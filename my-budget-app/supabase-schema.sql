@@ -46,4 +46,52 @@ CREATE POLICY "Allow all operations on categories" ON categories
 CREATE POLICY "Allow all operations on transactions" ON transactions
   FOR ALL USING (true) WITH CHECK (true);
 
+-- 점심 메뉴 테이블
+CREATE TABLE IF NOT EXISTS lunch_menus (
+  id BIGSERIAL PRIMARY KEY,
+  menu_name TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 점심 메뉴 투표 테이블
+CREATE TABLE IF NOT EXISTS lunch_votes (
+  id BIGSERIAL PRIMARY KEY,
+  menu_id BIGINT NOT NULL REFERENCES lunch_menus(id) ON DELETE CASCADE,
+  ip_address TEXT NOT NULL,
+  voted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(menu_id, ip_address)
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_lunch_votes_menu_id ON lunch_votes(menu_id);
+CREATE INDEX IF NOT EXISTS idx_lunch_votes_ip ON lunch_votes(ip_address);
+
+-- RLS 정책 설정
+ALTER TABLE lunch_menus ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lunch_votes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all operations on lunch_menus" ON lunch_menus
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow all operations on lunch_votes" ON lunch_votes
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 점심 추천 기록 테이블 (하루 1회 제한)
+CREATE TABLE IF NOT EXISTS lunch_recommendations (
+  id BIGSERIAL PRIMARY KEY,
+  ip_address TEXT NOT NULL,
+  recommended_at DATE NOT NULL DEFAULT CURRENT_DATE,
+  UNIQUE(ip_address, recommended_at)
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_lunch_recommendations_ip_date ON lunch_recommendations(ip_address, recommended_at);
+
+-- RLS 정책 설정
+ALTER TABLE lunch_recommendations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all operations on lunch_recommendations" ON lunch_recommendations
+  FOR ALL USING (true) WITH CHECK (true);
+
 

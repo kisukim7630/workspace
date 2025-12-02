@@ -13,24 +13,19 @@ if (!supabaseAnonKey) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
 }
 
-// Supabase 클라이언트 생성
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+// 서버 사이드에서 사용할 Supabase 클라이언트 생성
+let supabaseClient: ReturnType<typeof createClient>;
 
 try {
   supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      persistSession: false, // 서버 사이드에서는 세션을 저장하지 않음
+      autoRefreshToken: false,
     },
   });
 } catch (error) {
   console.error('Failed to create Supabase client:', error);
   throw new Error('Failed to initialize Supabase client');
-}
-
-// 클라이언트가 null인 경우 에러 처리
-if (!supabaseClient) {
-  throw new Error('Supabase client is not initialized');
 }
 
 export default supabaseClient;

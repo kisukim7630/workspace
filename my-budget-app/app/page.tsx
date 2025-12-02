@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import AIGuide from './components/AIGuide';
+import LunchRecommendation from './components/LunchRecommendation';
+import LunchVoting, { type LunchVotingRef } from './components/LunchVoting';
+import ImageGenerator from './components/ImageGenerator';
 
 type TransactionType = 'income' | 'expense';
 
@@ -253,14 +257,12 @@ const Calendar = ({
           return (
             <div
               key={day}
-              className={`aspect-square border border-gray-200 rounded-lg p-1 flex flex-col items-center justify-center ${
-                today ? 'bg-blue-50 border-blue-400' : 'bg-gray-50'
-              }`}
+              className={`aspect-square border border-gray-200 rounded-lg p-1 flex flex-col items-center justify-center ${today ? 'bg-blue-50 border-blue-400' : 'bg-gray-50'
+                }`}
             >
               <span
-                className={`text-xs font-medium mb-1 ${
-                  today ? 'text-blue-600' : 'text-gray-700'
-                }`}
+                className={`text-xs font-medium mb-1 ${today ? 'text-blue-600' : 'text-gray-700'
+                  }`}
               >
                 {day}
               </span>
@@ -408,7 +410,8 @@ export default function Home() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [loading, setLoading] = useState(true);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
-  
+  const lunchVotingRef = useRef<LunchVotingRef>(null);
+
   // 날짜 상태 (기본값: 현재 날짜/시간)
   const getCurrentDateTimeString = () => {
     const now = new Date();
@@ -430,7 +433,7 @@ export default function Home() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // 거래 내역 로드
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('transactions')
@@ -737,6 +740,15 @@ export default function Home() {
         {/* 제목 */}
         <h1 className="text-3xl font-bold text-center text-gray-800">가계부</h1>
 
+        {/* 점심 메뉴 추천 */}
+        <LunchRecommendation onMenusAdded={() => lunchVotingRef.current?.refresh()} />
+
+        {/* 점심 메뉴 투표 */}
+        <LunchVoting ref={lunchVotingRef} />
+
+        {/* AI 이미지 생성기 */}
+        <ImageGenerator />
+
         {/* 달력 카드 */}
         <Calendar
           transactions={transactions}
@@ -761,21 +773,22 @@ export default function Home() {
               </p>
             </div>
             <div
-              className={`rounded-lg p-4 ${
-                balance >= 0 ? 'bg-green-50' : 'bg-orange-50'
-              }`}
+              className={`rounded-lg p-4 ${balance >= 0 ? 'bg-green-50' : 'bg-orange-50'
+                }`}
             >
               <p className="text-sm text-gray-600 mb-1">잔액</p>
               <p
-                className={`text-2xl font-bold ${
-                  balance >= 0 ? 'text-green-600' : 'text-orange-600'
-                }`}
+                className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-orange-600'
+                  }`}
               >
                 ₩{formatAmount(balance)}
               </p>
             </div>
           </div>
         </div>
+
+        {/* AI 소비 분석 가이드 */}
+        <AIGuide transactions={transactions} />
 
         {/* 그래프 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -948,20 +961,18 @@ export default function Home() {
               {sortedTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className={`flex items-center justify-between p-4 rounded-lg border-l-4 ${
-                    transaction.type === 'income'
-                      ? 'bg-blue-50 border-blue-500'
-                      : 'bg-red-50 border-red-500'
-                  }`}
+                  className={`flex items-center justify-between p-4 rounded-lg border-l-4 ${transaction.type === 'income'
+                    ? 'bg-blue-50 border-blue-500'
+                    : 'bg-red-50 border-red-500'
+                    }`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          transaction.type === 'income'
-                            ? 'bg-blue-200 text-blue-800'
-                            : 'bg-red-200 text-red-800'
-                        }`}
+                        className={`px-2 py-1 rounded text-xs font-medium ${transaction.type === 'income'
+                          ? 'bg-blue-200 text-blue-800'
+                          : 'bg-red-200 text-red-800'
+                          }`}
                       >
                         {transaction.type === 'income' ? '수입' : '지출'}
                       </span>
@@ -979,11 +990,10 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-4">
                     <p
-                      className={`text-lg font-bold ${
-                        transaction.type === 'income'
-                          ? 'text-blue-600'
-                          : 'text-red-600'
-                      }`}
+                      className={`text-lg font-bold ${transaction.type === 'income'
+                        ? 'text-blue-600'
+                        : 'text-red-600'
+                        }`}
                     >
                       {transaction.type === 'income' ? '+' : '-'}₩
                       {formatAmount(transaction.amount)}
