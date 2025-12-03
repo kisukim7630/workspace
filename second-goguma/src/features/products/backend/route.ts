@@ -10,8 +10,11 @@ import {
   getUserId,
   type AppEnv,
 } from '@/backend/hono/context';
-import { CreateProductRequestSchema } from '@/features/products/backend/schema';
-import { createProduct } from './service';
+import {
+  CreateProductRequestSchema,
+  SearchProductsQuerySchema,
+} from '@/features/products/backend/schema';
+import { createProduct, searchProducts } from './service';
 import {
   productErrorCodes,
   type ProductServiceError,
@@ -53,6 +56,40 @@ export const registerProductRoutes = (app: Hono<AppEnv>) => {
 
       if (errorResult.error.code === productErrorCodes.createError) {
         logger.error('Failed to create product', errorResult.error.message);
+      }
+
+      return respond(c, result);
+    }
+
+    return respond(c, result);
+  });
+
+  app.get('/api/products/search', async (c) => {
+    const queryParams = c.req.query();
+    const parsedQuery = SearchProductsQuerySchema.safeParse(queryParams);
+
+    if (!parsedQuery.success) {
+      return respond(
+        c,
+        failure(
+          400,
+          'INVALID_SEARCH_QUERY',
+          'The provided search query is invalid.',
+          parsedQuery.error.format(),
+        ),
+      );
+    }
+
+    const supabase = getSupabase(c);
+    const logger = getLogger(c);
+
+    const result = await searchProducts(supabase, parsedQuery.data);
+
+    if (!result.ok) {
+      const errorResult = result as ErrorResult<ProductServiceError, unknown>;
+
+      if (errorResult.error.code === productErrorCodes.searchError) {
+        logger.error('Failed to search products', errorResult.error.message);
       }
 
       return respond(c, result);

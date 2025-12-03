@@ -3,6 +3,7 @@ export const productErrorCodes = {
   createError: 'PRODUCT_CREATE_ERROR',
   validationError: 'PRODUCT_VALIDATION_ERROR',
   unauthorized: 'PRODUCT_UNAUTHORIZED',
+  searchError: 'PRODUCT_SEARCH_ERROR',
 } as const;
 
 type ProductErrorValue = (typeof productErrorCodes)[keyof typeof productErrorCodes];

@@ -43,3 +43,24 @@ export const ProductTableRowSchema = z.object({
 
 export type ProductRow = z.infer<typeof ProductTableRowSchema>;
 
+export const SearchProductsQuerySchema = z.object({
+  q: z.string().optional(),
+  category: z.string().optional(),
+  location: z.string().optional(),
+  sort: z.enum(['latest', 'popular', 'price-low', 'price-high']).default('latest'),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export type SearchProductsQuery = z.infer<typeof SearchProductsQuerySchema>;
+
+export const SearchProductsResponseSchema = z.object({
+  products: z.array(ProductResponseSchema),
+  total: z.number().int().min(0),
+  page: z.number().int().min(1),
+  limit: z.number().int().min(1),
+  totalPages: z.number().int().min(0),
+});
+
+export type SearchProductsResponse = z.infer<typeof SearchProductsResponseSchema>;
+
