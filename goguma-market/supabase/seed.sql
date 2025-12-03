@@ -13,3 +13,4 @@ INSERT INTO products (title, price, location, image_url, like_count, status) VAL
 ON CONFLICT DO NOTHING;
 
 
+

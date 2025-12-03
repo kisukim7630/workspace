@@ -31,3 +31,4 @@ FROM products
 WHERE status = '판매완료'
 ORDER BY updated_at DESC;
 
+

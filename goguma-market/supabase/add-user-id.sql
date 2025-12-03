@@ -26,3 +26,4 @@ CREATE POLICY "Authenticated users can insert products" ON products
   FOR INSERT
   WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
 
+

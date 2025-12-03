@@ -73,3 +73,4 @@ SET like_count = (
   WHERE likes.product_id = products.id
 );
 
+

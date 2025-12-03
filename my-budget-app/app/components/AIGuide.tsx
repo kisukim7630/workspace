@@ -85,8 +85,22 @@ export default function AIGuide({ transactions }: AIGuideProps) {
                             <div className="h-4 bg-purple-200 rounded w-5/6"></div>
                         </div>
                     ) : (
-                        <div className="prose prose-purple max-w-none text-gray-700 whitespace-pre-wrap">
-                            {analysis}
+                        <div className="prose prose-purple max-w-none text-gray-700">
+                            <ReactMarkdown
+                                components={{
+                                    h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 text-purple-800">{children}</h1>,
+                                    h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 text-purple-700 mt-6">{children}</h2>,
+                                    h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 text-purple-600 mt-4">{children}</h3>,
+                                    p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+                                    ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
+                                    ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
+                                    li: ({ children }) => <li className="ml-4">{children}</li>,
+                                    strong: ({ children }) => <strong className="font-semibold text-purple-700">{children}</strong>,
+                                    em: ({ children }) => <em className="italic">{children}</em>,
+                                }}
+                            >
+                                {analysis}
+                            </ReactMarkdown>
                         </div>
                     )}
                 </div>

@@ -248,3 +248,4 @@ SET like_count = (
 - [좋아요 기능 상세 가이드](./supabase/SETUP_LIKES.md)
 - [Next.js 공식 문서](https://nextjs.org/docs)
 
+

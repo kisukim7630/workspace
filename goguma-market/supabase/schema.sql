@@ -46,3 +46,4 @@ CREATE POLICY "Anyone can update products" ON products
   USING (true);
 
 
+

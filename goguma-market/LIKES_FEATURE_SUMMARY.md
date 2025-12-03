@@ -349,3 +349,4 @@ DROP TRIGGER IF EXISTS trigger_update_like_count_on_delete ON likes;
 - `SETUP_DATABASE.md` - 데이터베이스 전체 설정 가이드
 - `README.md` - 프로젝트 개요
 
+

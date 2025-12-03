@@ -36,3 +36,4 @@ CREATE POLICY "Authenticated users can insert products" ON products
 --   FOR DELETE
 --   USING (auth.uid() = user_id);
 
+

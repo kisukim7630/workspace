@@ -162,3 +162,4 @@ CREATE TRIGGER restore_product_on_cancel_trigger
   EXECUTE FUNCTION restore_product_status_on_cancel();
 ```
 
+

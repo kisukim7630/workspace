@@ -59,3 +59,31 @@ export interface Order {
   updated_at: string;
 }
 
+// 리뷰 타입 정의
+export interface Review {
+  id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  order_id: string;
+  product_id: string;
+  rating: number; // 1~5
+  comment: string | null;
+  review_type: '구매자' | '판매자';
+  created_at: string;
+  updated_at: string;
+}
+
+// 프로필 타입 확장
+export interface Profile {
+  id: string;
+  email: string;
+  nickname: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  phone: string | null;
+  location: string | null;
+  temperature: number | null;
+  created_at: string;
+  updated_at: string;
+}
+

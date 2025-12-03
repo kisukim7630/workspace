@@ -73,3 +73,4 @@ SELECT * FROM orders LIMIT 1;
 ### "foreign key constraint" 오류
 → products 테이블이 먼저 생성되어야 합니다. `supabase/schema.sql`을 먼저 실행하세요.
 
+

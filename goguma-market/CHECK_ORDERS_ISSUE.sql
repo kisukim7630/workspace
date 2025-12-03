@@ -47,3 +47,4 @@ WHERE status = '판매완료'
   AND id NOT IN (SELECT DISTINCT product_id FROM orders WHERE status = 'DONE');
 */
 
+

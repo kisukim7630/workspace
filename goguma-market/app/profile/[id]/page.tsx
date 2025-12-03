@@ -11,6 +11,7 @@ interface Profile {
   bio: string | null;
   phone: string | null;
   location: string | null;
+  temperature: number | null;
   created_at: string;
 }
 
@@ -94,6 +95,56 @@ export default async function ProfilePage({
     return new Intl.NumberFormat('ko-KR').format(price);
   };
 
+  // 온도에 따른 색상 및 아이콘 결정
+  const getTemperatureStyle = (temp: number | null) => {
+    const temperature = temp ?? 36;
+    
+    if (temperature >= 70) {
+      return {
+        color: 'text-red-600 dark:text-red-400',
+        bgColor: 'bg-red-50 dark:bg-red-900/20',
+        borderColor: 'border-red-200 dark:border-red-800',
+        icon: '🔥',
+        label: '매우 따뜻',
+      };
+    } else if (temperature >= 50) {
+      return {
+        color: 'text-orange-600 dark:text-orange-400',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+        borderColor: 'border-orange-200 dark:border-orange-800',
+        icon: '🌡️',
+        label: '따뜻',
+      };
+    } else if (temperature >= 36) {
+      return {
+        color: 'text-yellow-600 dark:text-yellow-400',
+        bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+        borderColor: 'border-yellow-200 dark:border-yellow-800',
+        icon: '🌤️',
+        label: '보통',
+      };
+    } else if (temperature >= 20) {
+      return {
+        color: 'text-blue-600 dark:text-blue-400',
+        bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+        borderColor: 'border-blue-200 dark:border-blue-800',
+        icon: '❄️',
+        label: '차갑',
+      };
+    } else {
+      return {
+        color: 'text-gray-600 dark:text-gray-400',
+        bgColor: 'bg-gray-50 dark:bg-gray-900/20',
+        borderColor: 'border-gray-200 dark:border-gray-800',
+        icon: '🧊',
+        label: '매우 차갑',
+      };
+    }
+  };
+
+  const tempStyle = getTemperatureStyle(profile.temperature);
+  const temperature = profile.temperature ?? 36;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -119,9 +170,21 @@ export default async function ProfilePage({
 
               {/* 프로필 정보 */}
               <div className="flex-1 text-center sm:text-left">
-                <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  {profile.nickname || '익명 사용자'}
-                </h1>
+                <div className="mb-2 flex items-center justify-center gap-3 sm:justify-start">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    {profile.nickname || '익명 사용자'}
+                  </h1>
+                  {/* 온도 표시 */}
+                  <div className={`flex items-center gap-2 rounded-full border px-3 py-1 ${tempStyle.bgColor} ${tempStyle.borderColor}`}>
+                    <span className="text-lg">{tempStyle.icon}</span>
+                    <span className={`text-lg font-bold ${tempStyle.color}`}>
+                      {temperature.toFixed(1)}°
+                    </span>
+                  </div>
+                </div>
+                <p className="mb-2 text-xs text-gray-400 dark:text-gray-500">
+                  {tempStyle.label}
+                </p>
                 <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                   {formatDate(profile.created_at)} 가입
                 </p>
@@ -246,4 +309,5 @@ export default async function ProfilePage({
     </div>
   );
 }
+
 
